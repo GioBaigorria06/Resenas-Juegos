@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reseñas de Videojuegos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e10;
+      --surface: #18181c;
+      --surface2: #222228;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0efec;
+      --text-muted: #888885;
+      --text-dim: #555552;
+      --accent: #c8ff00;
+      --accent-dim: rgba(200,255,0,0.12);
+      --accent-text: #0e1600;
+      --star: #f5b731;
+      --font-display: 'Syne', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --radius: 12px;
+      --radius-sm: 7px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      background: rgba(14,14,16,0.85);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-dot {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .header-tabs {
+      display: flex;
+      gap: 2px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 6px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all 0.18s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--surface2); }
+    .tab-btn.active {
+      color: var(--accent-text);
+      background: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── FEED ── */
+    .feed-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .feed-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .feed-count {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .filter-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      font-family: var(--font-body);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-pill:hover { border-color: var(--border2); color: var(--text); }
+    .filter-pill.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── REVIEW CARD ── */
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 12px;
+      transition: border-color 0.18s;
+    }
+    .review-card:hover { border-color: var(--border2); }
+
+    .review-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .review-game {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+    .review-stars {
+      color: var(--star);
+      font-size: 13px;
+      letter-spacing: 2px;
+      margin: 5px 0 3px;
+    }
+    .review-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .review-meta span { display: flex; align-items: center; gap: 4px; }
+    .sep { color: var(--border2); }
+
+    .genre-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .review-body {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: #b0afac;
+      line-height: 1.65;
+    }
+    .review-date {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 10px;
+      text-align: right;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty p { font-size: 14px; }
+
+    /* ── FORM ── */
+    .form-wrap {
+      max-width: 620px;
+    }
+    .form-heading {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin-bottom: 6px;
+    }
+    .form-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.18s;
+      appearance: none;
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .form-group select option { background: #222228; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { height: 110px; resize: vertical; line-height: 1.6; }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: var(--text-dim); }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .stars-row { display: flex; align-items: center; gap: 6px; }
+    .star-b {
+      background: none; border: none;
+      font-size: 26px;
+      cursor: pointer;
+      color: var(--surface2);
+      transition: color 0.12s, transform 0.1s;
+      line-height: 1;
+      padding: 2px;
+    }
+    .star-b.lit { color: var(--star); }
+    .star-b:hover { transform: scale(1.15); }
+    .star-text { font-size: 13px; color: var(--text-muted); margin-left: 8px; }
+
+    .submit-btn {
+      margin-top: 6px;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px 28px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.88; }
+    .submit-btn:active { transform: scale(0.98); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 1.5rem 1rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      header { padding: 0 1rem; }
+      .logo span:last-child { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      <span>GameReviews</span>
+    </div>
+    <div class="header-tabs">
+      <button class="tab-btn active" onclick="switchTab('feed')">Reseñas</button>
+      <button class="tab-btn" onclick="switchTab('form')">Escribir reseña</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- FEED -->
+  <div id="panel-feed" class="panel active">
+    <div class="feed-header">
+      <div>
+        <div class="feed-title">Todas las reseñas</div>
+        <div class="feed-count" id="count-bar">Cargando...</div>
+      </div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button class="filter-pill active" onclick="setFilter('Todos')">Todos</button>
+      <button class="filter-pill" onclick="setFilter('Acción')">Acción</button>
+      <button class="filter-pill" onclick="setFilter('RPG')">RPG</button>
+      <button class="filter-pill" onclick="setFilter('Aventura')">Aventura</button>
+      <button class="filter-pill" onclick="setFilter('Deportes')">Deportes</button>
+      <button class="filter-pill" onclick="setFilter('Estrategia')">Estrategia</button>
+      <button class="filter-pill" onclick="setFilter('Terror')">Terror</button>
+    </div>
+
+    <div id="reviews-list"></div>
+  </div>
+
+  <!-- FORM -->
+  <div id="panel-form" class="panel">
+    <div class="form-wrap">
+      <div class="form-heading">Escribir reseña</div>
+      <div class="form-sub">Compartí tu experiencia con la comunidad</div>
+
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre del juego *</label>
+            <input type="text" id="f-game" placeholder="Ej: Elden Ring" />
+          </div>
+          <div class="form-group">
+            <label>Género</label>
+            <select id="f-genre">
+              <option value="Acción">Acción</option>
+              <option value="RPG">RPG</option>
+              <option value="Aventura">Aventura</option>
+              <option value="Deportes">Deportes</option>
+              <option value="Estrategia">Estrategia</option>
+              <option value="Terror">Terror</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tu nombre</label>
+            <input type="text" id="f-author" placeholder="Anónimo" />
+          </div>
+          <div class="form-group">
+            <label>Plataforma</label>
+            <select id="f-platform">
+              <option>PC</option>
+              <option>PS5</option>
+              <option>PS4</option>
+              <option>Xbox Series X</option>
+              <option>Xbox One</option>
+              <option>Nintendo Switch</option>
+              <option>Móvil</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Puntuación *</label>
+          <div class="stars-row">
+            <button class="star-b" onclick="setStar(1)">★</button>
+            <button class="star-b" onclick="setStar(2)">★</button>
+            <button class="star-b" onclick="setStar(3)">★</button>
+            <button class="star-b" onclick="setStar(4)">★</button>
+            <button class="star-b" onclick="setStar(5)">★</button>
+            <span class="star-text" id="star-label">Sin puntuación</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tu reseña *</label>
+          <textarea id="f-text" placeholder="Escribí aquí tu opinión sobre el juego..."></textarea>
+        </div>
+        <button class="submit-btn" onclick="submitReview()">Publicar reseña</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const INITIAL = [
+    { id: 1, game: 'Elden Ring', genre: 'RPG', author: 'Marcos', platform: 'PC', stars: 5, text: 'Una obra maestra absoluta. El diseño de mundo abierto es incomparable y la dificultad está perfectamente balanceada. Cientos de horas de contenido que valen cada segundo.', date: '12 abr 2026' },
+    { id: 2, game: 'God of War Ragnarök', genre: 'Acción', author: 'Valeria', platform: 'PS5', stars: 5, text: 'La historia emocional más potente que jugué en años. La relación entre Kratos y Atreus llega a su punto culminante de forma brutal y hermosa. Una joya imprescindible.', date: '10 abr 2026' },
+    { id: 3, game: 'Hollow Knight', genre: 'Aventura', author: 'Julián', platform: 'Nintendo Switch', stars: 4, text: 'Un metroidvania increíble con arte precioso y combate preciso. La exploración es adictiva aunque algunos jefes al final se sienten un poco repetitivos.', date: '8 abr 2026' },
+    { id: 4, game: 'Resident Evil Village', genre: 'Terror', author: 'Ana', platform: 'PS5', stars: 4, text: 'Atmósfera increíble y los primeros actos son terroríficos de verdad. La señora Dimitrescu ya es icónica. Pierde algo de ritmo hacia el final pero vale la pena.', date: '5 abr 2026' },
+    { id: 5, game: 'Civilization VI', genre: 'Estrategia', author: 'Ricardo', platform: 'PC', stars: 4, text: 'El clásico "una vuelta más". Sistema de distritos brillante y gran variedad de civs. Puede abrumar al principio pero es muy satisfactorio dominarlo.', date: '3 abr 2026' },
+  ];
+
+  let reviews = JSON.parse(localStorage.getItem('vg_reviews') || 'null') || INITIAL;
+  let nextId = reviews.length ? Math.max(...reviews.map(r => r.id)) + 1 : 6;
+  let currentFilter = 'Todos';
+  let currentStar = 0;
+
+  function save() { try { localStorage.setItem('vg_reviews', JSON.stringify(reviews)); } catch(e){} }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) =>
+      b.classList.toggle('active', (tab === 'feed' && i === 0) || (tab === 'form' && i === 1))
+    );
+    document.getElementById('panel-feed').classList.toggle('active', tab === 'feed');
+    document.getElementById('panel-form').classList.toggle('active', tab === 'form');
+    if (tab === 'feed') renderReviews();
+  }
+
+  function setFilter(g) {
+    currentFilter = g;
+    document.querySelectorAll('.filter-pill').forEach(p =>
+      p.classList.toggle('active', p.textContent.trim() === g)
+    );
+    renderReviews();
+  }
+
+  function stars(n) {
+    return '<span style="color:#f5b731">' + '★'.repeat(n) + '</span><span style="color:#333">' + '☆'.repeat(5 - n) + '</span>';
+  }
+
+  function renderReviews() {
+    const filtered = currentFilter === 'Todos' ? reviews : reviews.filter(r => r.genre === currentFilter);
+    const sorted = [...filtered].sort((a, b) => b.id - a.id);
+    document.getElementById('count-bar').textContent = sorted.length === 1 ? '1 reseña' : `${sorted.length} reseñas`;
+    const list = document.getElementById('reviews-list');
+    if (!sorted.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🎮</div><p>No hay reseñas en esta categoría todavía.</p></div>';
+      return;
+    }
+    list.innerHTML = sorted.map(r => `
+      <div class="review-card">
+        <div class="review-top">
+          <div>
+            <div class="review-game">${r.game}</div>
+            <div class="review-stars">${stars(r.stars)}</div>
+            <div class="review-meta">
+              <span>${r.author || 'Anónimo'}</span>
+              <span class="sep">·</span>
+              <span>${r.platform}</span>
+            </div>
+          </div>
+          <span class="genre-badge">${r.genre}</span>
+        </div>
+        <div class="review-body">${r.text}</div>
+        <div class="review-date">${r.date}</div>
+      </div>
+    `).join('');
+  }
+
+  function setStar(n) {
+    currentStar = n;
+    const labels = ['', 'Malo', 'Regular', 'Bueno', 'Muy bueno', 'Excelente'];
+    document.getElementById('star-label').textContent = labels[n];
+    document.querySelectorAll('.star-b').forEach((b, i) => b.classList.toggle('lit', i < n));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function submitReview() {
+    const game = document.getElementById('f-game').value.trim();
+    const text = document.getElementById('f-text').value.trim();
+    if (!game) { showToast('Ingresá el nombre del juego'); return; }
+    if (!currentStar) { showToast('Seleccioná una puntuación'); return; }
+    if (!text) { showToast('Escribí tu reseña'); return; }
+
+    const now = new Date();
+    const date = now.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    reviews.push({
+      id: nextId++,
+      game,
+      genre: document.getElementById('f-genre').value,
+      author: document.getElementById('f-author').value.trim(),
+      platform: document.getElementById('f-platform').value,
+      stars: currentStar,
+      text,
+      date
+    });
+    save();
+
+    document.getElementById('f-game').value = '';
+    document.getElementById('f-author').value = '';
+    document.getElementById('f-text').value = '';
+    currentStar = 0;
+    document.querySelectorAll('.star-b').forEach(b => b.classList.remove('lit'));
+    document.getElementById('star-label').textContent = 'Sin puntuación';
+
+    showToast('¡Reseña publicada!');
+    switchTab('feed');
+  }
+
+  renderReviews();
+</script>
+</body>
+</html>
